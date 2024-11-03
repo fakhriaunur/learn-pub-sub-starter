@@ -1,0 +1,137 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "go@1.23.1": {
+      "last_modified": "2024-09-10T15:01:03Z",
+      "resolved": "github:NixOS/nixpkgs/5ed627539ac84809c78b2dd6d26a5cebeb5ae269#go_1_23",
+      "source": "devbox-search",
+      "version": "1.23.1",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/nvaay1c4banbccyvv6ba1gzyqpypjmfq-go-1.23.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/nvaay1c4banbccyvv6ba1gzyqpypjmfq-go-1.23.1"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/9ylsay11jb3p6yarkmlz0fin76cdypwa-go-1.23.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/9ylsay11jb3p6yarkmlz0fin76cdypwa-go-1.23.1"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/zkg5xhyx2rs03dq0qp14nqlx9ff1y5c5-go-1.23.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/zkg5xhyx2rs03dq0qp14nqlx9ff1y5c5-go-1.23.1"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/mi0ybwsm6pmxzv9hsm6bcbqaq1pkf8wh-go-1.23.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/mi0ybwsm6pmxzv9hsm6bcbqaq1pkf8wh-go-1.23.1"
+        }
+      }
+    },
+    "rabbitmq-server@latest": {
+      "last_modified": "2024-10-22T11:15:56Z",
+      "resolved": "github:NixOS/nixpkgs/782740762fb281404740b6b7084d356c3dab1173#rabbitmq-server",
+      "source": "devbox-search",
+      "version": "3.13.7",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/qxb0mnkjyrwf5wm3iijzq15icwgk9901-rabbitmq-server-3.13.7",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/wil49h1rpb4iva2ciy9gl6rn6b6d9s7f-rabbitmq-server-3.13.7-man",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/sg6glgip9sk4wz94h340iqlhk2pv8lks-rabbitmq-server-3.13.7-doc"
+            }
+          ],
+          "store_path": "/nix/store/qxb0mnkjyrwf5wm3iijzq15icwgk9901-rabbitmq-server-3.13.7"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/z0qd8qkb9dwd077xl1ap6rys4h89zimv-rabbitmq-server-3.13.7",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/l8jzjpvsjlncmy822lwv8859ay8dy1b8-rabbitmq-server-3.13.7-man",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/xy0dldz8wdr0vwwz3gccwl0jipx1a73q-rabbitmq-server-3.13.7-doc"
+            }
+          ],
+          "store_path": "/nix/store/z0qd8qkb9dwd077xl1ap6rys4h89zimv-rabbitmq-server-3.13.7"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/priv1dmwk337naci2rnsggq2b1ryv2gy-rabbitmq-server-3.13.7",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/j6p8s12h58vh9bjwdrr7z5fmpsmn1yhf-rabbitmq-server-3.13.7-man",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/29xlziqbkw53am9m52ilpff869r011rx-rabbitmq-server-3.13.7-doc"
+            }
+          ],
+          "store_path": "/nix/store/priv1dmwk337naci2rnsggq2b1ryv2gy-rabbitmq-server-3.13.7"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/c1jcz2xnnmz32q75s93vr0sn4cl0v55c-rabbitmq-server-3.13.7",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/jyq20fygdjsxaqsxd4wvcf4vkky61lcr-rabbitmq-server-3.13.7-man",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/vlill2j4z91cj5bsqzswxmnkbrjcpd5m-rabbitmq-server-3.13.7-doc"
+            }
+          ],
+          "store_path": "/nix/store/c1jcz2xnnmz32q75s93vr0sn4cl0v55c-rabbitmq-server-3.13.7"
+        }
+      }
+    }
+  }
+}
