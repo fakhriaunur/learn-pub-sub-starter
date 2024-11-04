@@ -47,11 +47,13 @@ func main() {
 		case "spawn":
 			if err := gameState.CommandSpawn(words); err != nil {
 				fmt.Printf("couldn't spawn: %v", err)
+				continue
 			}
 		case "move":
 			_, err := gameState.CommandMove(words)
 			if err != nil {
 				fmt.Printf("couldn't move: %v", err)
+				continue
 			}
 		case "status":
 			gameState.CommandStatus()

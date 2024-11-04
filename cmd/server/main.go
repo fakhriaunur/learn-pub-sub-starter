@@ -35,20 +35,22 @@ func main() {
 		}
 		switch words[0] {
 		case "pause":
+			fmt.Println("Publishing paused game state")
 			if err := pubsub.PublishJSON(ch, routing.ExchangePerilDirect, routing.PauseKey,
 				routing.PlayingState{
 					IsPaused: true,
 				}); err != nil {
-				log.Fatalf("couldn't publish json: %v", err)
+				log.Fatalf("couldn't publish time: %v", err)
 			}
 			fmt.Println("Pause message sent!")
 
 		case "resume":
+			fmt.Println("Publishing resumed game state")
 			if err := pubsub.PublishJSON(ch, routing.ExchangePerilDirect, routing.PauseKey,
 				routing.PlayingState{
 					IsPaused: false,
 				}); err != nil {
-				log.Fatalf("couldn't publish json: %v", err)
+				log.Fatalf("couldn't publish time: %v", err)
 			}
 			fmt.Println("Resume message sent!")
 
