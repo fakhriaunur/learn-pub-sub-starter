@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
-	"os/signal"
 
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
@@ -38,16 +36,38 @@ func main() {
 	}
 	fmt.Printf("Queue %v declared and bound\n", queue.Name)
 
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt)
-	interruptSignal := <-signalChan
+	gameState := gamelogic.NewGameState(username)
+	for {
+		words := gamelogic.GetInput()
 
-	fmt.Printf("\n%s signal received\n", interruptSignal.String())
-	fmt.Println("Peril client is shutting down...")
+		if len(words) == 0 {
+			continue
+		}
+		switch words[0] {
+		case "spawn":
+			if err := gameState.CommandSpawn(words); err != nil {
+				fmt.Printf("couldn't spawn: %v", err)
+			}
+		case "move":
+			_, err := gameState.CommandMove(words)
+			if err != nil {
+				fmt.Printf("couldn't move: %v", err)
+			}
+		case "status":
+			gameState.CommandStatus()
+		case "help":
+			gamelogic.PrintClientHelp()
+		case "spam":
+			fmt.Println("Spamming not allowed yet!")
+		case "quit":
+			gamelogic.PrintQuit()
+			log.Println("Quitting the game...")
+			log.Println("Peril client is shutting down...")
+			return
 
-	// ch, err := conn.Channel()
-	// if err != nil {
-	// 	log.Fatalf("couldn't open the channel: %v", err)
-	// }
+		default:
+			fmt.Println("unknown command")
+		}
 
+	}
 }

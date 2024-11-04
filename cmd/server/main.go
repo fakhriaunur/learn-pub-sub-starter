@@ -54,6 +54,7 @@ func main() {
 
 		case "quit":
 			log.Println("Exiting the game...")
+			log.Println("Peril client is shutting down...")
 			return
 
 		default:
