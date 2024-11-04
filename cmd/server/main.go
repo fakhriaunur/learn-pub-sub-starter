@@ -14,12 +14,13 @@ import (
 func main() {
 	fmt.Println("Starting Peril server...")
 
-	url := "amqp://guest:guest@localhost:5672/"
-	conn, err := amqp.Dial(url)
+	const rabbitMQConnStr = "amqp://guest:guest@localhost:5672/"
+	conn, err := amqp.Dial(rabbitMQConnStr)
 	if err != nil {
 		log.Fatalf("couldn't dial the url: %v", err)
 	}
 	defer conn.Close()
+	fmt.Println("Peril game server connected to RabbitMQ")
 
 	ch, err := conn.Channel()
 	if err != nil {
@@ -32,8 +33,7 @@ func main() {
 		}); err != nil {
 		log.Fatalf("couldn't publish json: %v", err)
 	}
-
-	fmt.Println("Successfully connected to the URL")
+	fmt.Println("Pause message sent!")
 
 	// wait for ctrl + c
 	signalChan := make(chan os.Signal, 1)

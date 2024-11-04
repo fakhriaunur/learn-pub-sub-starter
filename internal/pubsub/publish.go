@@ -14,15 +14,10 @@ func PublishJSON[T any](ch *amqp.Channel, exchange, key string, val T) error {
 		return fmt.Errorf("coundn't marshal json: %w", err)
 	}
 
-	err = ch.PublishWithContext(context.Background(),
+	return ch.PublishWithContext(context.Background(),
 		exchange, key, false, false,
 		amqp.Publishing{
 			ContentType: "application-json",
 			Body:        jsonData,
 		})
-	if err != nil {
-		return fmt.Errorf("couldn't publish with context: %w", err)
-	}
-
-	return nil
 }
