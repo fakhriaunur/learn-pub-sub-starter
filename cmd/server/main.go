@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
-	"os/signal"
 
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
@@ -35,7 +33,8 @@ func main() {
 		if len(words) == 0 {
 			continue
 		}
-		if words[0] == "pause" {
+		switch words[0] {
+		case "pause":
 			if err := pubsub.PublishJSON(ch, routing.ExchangePerilDirect, routing.PauseKey,
 				routing.PlayingState{
 					IsPaused: true,
@@ -44,7 +43,7 @@ func main() {
 			}
 			fmt.Println("Pause message sent!")
 
-		} else if words[0] == "resume" {
+		case "resume":
 			if err := pubsub.PublishJSON(ch, routing.ExchangePerilDirect, routing.PauseKey,
 				routing.PlayingState{
 					IsPaused: false,
@@ -53,20 +52,12 @@ func main() {
 			}
 			fmt.Println("Resume message sent!")
 
-		} else if words[0] == "quit" {
-			fmt.Println("Exiting the game...")
-			break
+		case "quit":
+			log.Println("Exiting the game...")
+			return
 
-		} else {
+		default:
 			fmt.Println("couldn't understand the command")
 		}
 	}
-
-	// wait for ctrl + c
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt)
-	interruptSignal := <-signalChan
-
-	fmt.Printf("\n%s signal received\n", interruptSignal.String())
-	fmt.Println("Peril server is shutting down...")
 }
