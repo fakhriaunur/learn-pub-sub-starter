@@ -1,10 +1,13 @@
 package pubsub
 
 import (
+	"encoding/json"
 	"fmt"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
+
+type AckType int
 
 type SimpleQueueType int
 
@@ -41,4 +44,46 @@ func DeclareAndBind(
 	}
 
 	return ch, queue, nil
+}
+
+func SubscribeJSON[T any](
+	conn *amqp.Connection,
+	exchange,
+	queueName,
+	key string,
+	simpleQueueType SimpleQueueType,
+	handler func(T),
+) error {
+	ch, queue, err := DeclareAndBind(
+		conn, exchange, queueName,
+		key, simpleQueueType,
+	)
+	if err != nil {
+		return fmt.Errorf("couldnt declare and bind: %w", err)
+	}
+
+	deliveryCh, err := ch.Consume(
+		queue.Name, "", false, false, false, false,
+		amqp.Table{},
+	)
+	if err != nil {
+		return fmt.Errorf("couldn't consume: %w", err)
+	}
+
+	var jsonMsg T
+	go func() {
+		for msg := range deliveryCh {
+			if err := json.Unmarshal(msg.Body, &jsonMsg); err != nil {
+				fmt.Printf("couldn't unmarshal: %v", err)
+			}
+
+			handler(jsonMsg)
+			if err := msg.Ack(false); err != nil {
+				fmt.Printf("couldn't acknowledge: %v", err)
+			}
+		}
+
+	}()
+
+	return nil
 }
