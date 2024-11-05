@@ -45,8 +45,19 @@ func main() {
 
 	if err := pubsub.SubscribeJSON(
 		conn,
+		routing.ExchangePerilDirect,
+		routing.PauseKey+"."+gameState.GetUsername(),
+		routing.PauseKey,
+		pubsub.SimpleQueueTransient,
+		handlerPause(gameState),
+	); err != nil {
+		log.Fatalf("couldn't subscribe to army moves: %v", err)
+	}
+
+	if err := pubsub.SubscribeJSON(
+		conn,
 		routing.ExchangePerilTopic,
-		routing.ArmyMovesPrefix+"."+username,
+		routing.ArmyMovesPrefix+"."+gameState.GetUsername(),
 		routing.ArmyMovesPrefix+".*",
 		pubsub.SimpleQueueTransient,
 		handlerMove(gameState),
@@ -76,13 +87,13 @@ func main() {
 			if err := pubsub.PublishJSON(
 				publishCh,
 				routing.ExchangePerilTopic,
-				routing.ArmyMovesPrefix+"."+username,
+				routing.ArmyMovesPrefix+"."+mv.Player.Username,
 				mv,
 			); err != nil {
 				fmt.Printf("error: %v", err)
 				continue
 			}
-			log.Println("The move was published successfully!")
+			fmt.Printf("Moved %v units to %s\n", len(mv.Units), mv.ToLocation)
 
 		case "status":
 			gameState.CommandStatus()

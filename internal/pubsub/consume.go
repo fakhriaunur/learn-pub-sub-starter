@@ -9,6 +9,12 @@ import (
 
 type AckType int
 
+const (
+	Ack AckType = iota
+	NackRequeue
+	NackDiscard
+)
+
 type SimpleQueueType int
 
 const (
@@ -52,7 +58,7 @@ func SubscribeJSON[T any](
 	queueName,
 	key string,
 	simpleQueueType SimpleQueueType,
-	handler func(T),
+	handler func(T) AckType,
 ) error {
 	ch, queue, err := DeclareAndBind(
 		conn, exchange, queueName,
@@ -70,19 +76,33 @@ func SubscribeJSON[T any](
 		return fmt.Errorf("couldn't consume: %w", err)
 	}
 
-	var jsonMsg T
 	go func() {
+		defer ch.Close()
 		for msg := range deliveryCh {
+			var jsonMsg T
 			if err := json.Unmarshal(msg.Body, &jsonMsg); err != nil {
 				fmt.Printf("couldn't unmarshal: %v", err)
 			}
 
-			handler(jsonMsg)
-			if err := msg.Ack(false); err != nil {
-				fmt.Printf("couldn't acknowledge: %v", err)
+			ackType := handler(jsonMsg)
+			switch ackType {
+			case Ack:
+				if err := msg.Ack(false); err != nil {
+					fmt.Printf("couldn't deliver acknowledge: %v", err)
+				}
+				fmt.Println("Ack")
+			case NackRequeue:
+				if err := msg.Nack(false, true); err != nil {
+					fmt.Printf("coudln't deliver acknowledge: %v", err)
+				}
+				fmt.Println("NackRequeue")
+			case NackDiscard:
+				if err := msg.Nack(false, false); err != nil {
+					fmt.Printf("couldn't deliver acknowledge: %v", err)
+				}
+				fmt.Println("NackDiscard")
 			}
 		}
-
 	}()
 
 	return nil
