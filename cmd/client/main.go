@@ -29,7 +29,7 @@ func main() {
 	_, queue, err := pubsub.DeclareAndBind(
 		conn, routing.ExchangePerilDirect,
 		fmt.Sprintf("%s.%s", routing.PauseKey, username),
-		routing.PauseKey, 1,
+		routing.PauseKey, pubsub.SimpleQueueTransient,
 	)
 	if err != nil {
 		log.Fatalf("couldn't declare and bind: %v", err)

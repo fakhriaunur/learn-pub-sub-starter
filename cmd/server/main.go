@@ -26,6 +26,17 @@ func main() {
 		log.Fatalf("couldn't open the channel: %v", err)
 	}
 
+	_, queue, err := pubsub.DeclareAndBind(
+		conn, routing.ExchangePerilTopic,
+		routing.GameLogSlug,
+		fmt.Sprintf("%s.*", routing.GameLogSlug),
+		pubsub.SimpleQueueDurable,
+	)
+	if err != nil {
+		log.Fatalf("couldn't declare and bind: %v", err)
+	}
+	fmt.Printf("%s successfully declared and bound\n", queue.Name)
+
 	gamelogic.PrintServerHelp()
 	for {
 		words := gamelogic.GetInput()
