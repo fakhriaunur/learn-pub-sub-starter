@@ -34,9 +34,14 @@ func DeclareAndBind(
 		return nil, amqp.Queue{}, fmt.Errorf("coudn't open the channel: %w", err)
 	}
 
+	table := amqp.Table{
+		"x-dead-letter-exchange": "peril_dlx",
+	}
+
 	queue, err := ch.QueueDeclare(
 		queueName, simpleQueueType == SimpleQueueDurable, simpleQueueType == SimpleQueueTransient,
-		simpleQueueType == SimpleQueueTransient, false, nil,
+		simpleQueueType == SimpleQueueTransient, false,
+		table,
 	)
 	if err != nil {
 		return nil, amqp.Queue{}, fmt.Errorf("couldn't declare the queue: %w", err)
