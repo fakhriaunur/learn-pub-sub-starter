@@ -29,7 +29,7 @@ func main() {
 	_, queue, err := pubsub.DeclareAndBind(
 		conn, routing.ExchangePerilTopic,
 		routing.GameLogSlug,
-		fmt.Sprintf("%s.*", routing.GameLogSlug),
+		routing.GameLogSlug+".*",
 		pubsub.SimpleQueueDurable,
 	)
 	if err != nil {

@@ -28,7 +28,7 @@ func main() {
 
 	_, queue, err := pubsub.DeclareAndBind(
 		conn, routing.ExchangePerilDirect,
-		fmt.Sprintf("%s.%s", routing.PauseKey, username),
+		routing.PauseKey+"."+username,
 		routing.PauseKey, pubsub.SimpleQueueTransient,
 	)
 	if err != nil {
