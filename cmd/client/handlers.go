@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
@@ -34,36 +35,65 @@ func handlerMove(ch *amqp.Channel, gs *gamelogic.GameState) func(gamelogic.ArmyM
 				ch,
 				routing.ExchangePerilTopic,
 				routing.WarRecognitionsPrefix+"."+gs.GetUsername(),
-				armyMove,
+				gamelogic.RecognitionOfWar{
+					Attacker: armyMove.Player,
+					Defender: gs.GetPlayerSnap(),
+				},
 			); err != nil {
 				fmt.Printf("couldn't publish: %v", err)
 				return pubsub.NackRequeue
 			}
 			return pubsub.Ack
 		}
-
+		fmt.Println("error: unknown move outcome")
 		return pubsub.NackDiscard
 	}
 }
 
-func handlerWar(gs *gamelogic.GameState) func(gamelogic.RecognitionOfWar) pubsub.AckType {
+func handlerWar(ch *amqp.Channel, gs *gamelogic.GameState) func(gamelogic.RecognitionOfWar) pubsub.AckType {
 	return func(recogWar gamelogic.RecognitionOfWar) pubsub.AckType {
 		defer fmt.Print("> ")
 
-		warOutcome, _, _ := gs.HandleWar(recogWar)
+		fmt.Printf("RecogWar: %+v\n", recogWar)
+		warOutcome, winner, loser := gs.HandleWar(recogWar)
+		fmt.Printf("Winner: %s, Loser: %s\n", winner, loser)
+		fmt.Printf("Current username: %s\n", gs.GetUsername())
 
+		var ackType pubsub.AckType
+		var message string
 		switch warOutcome {
 		case gamelogic.WarOutcomeNotInvolved:
-			return pubsub.NackRequeue
+			ackType = pubsub.NackRequeue
 		case gamelogic.WarOutcomeNoUnits:
-			return pubsub.NackDiscard
+			ackType = pubsub.NackDiscard
 		case gamelogic.WarOutcomeOpponentWon,
-			gamelogic.WarOutcomeYouWon,
-			gamelogic.WarOutcomeDraw:
-			return pubsub.Ack
+			gamelogic.WarOutcomeYouWon:
+			message = fmt.Sprintf("%s won a war against %s", winner, loser)
+			ackType = pubsub.Ack
+		case gamelogic.WarOutcomeDraw:
+			message = fmt.Sprintf("A war between %s and %s resulted in a draw", winner, loser)
+			ackType = pubsub.Ack
+		default:
+			fmt.Println("unknown war outcome")
 		}
 
-		fmt.Println("unknown war outcome")
-		return pubsub.NackDiscard
+		gameLog := routing.GameLog{
+			CurrentTime: time.Now(),
+			Username:    gs.GetUsername(),
+			Message:     message,
+		}
+
+		if ackType == pubsub.Ack {
+			if err := pubsub.PublishGob(
+				ch,
+				routing.ExchangePerilTopic,
+				routing.GameLogSlug+"."+gs.GetUsername(),
+				gameLog,
+			); err != nil {
+				fmt.Printf("coudln't publish log: %v", err)
+				return pubsub.NackRequeue
+			}
+		}
+		return ackType
 	}
 }

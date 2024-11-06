@@ -95,17 +95,14 @@ func SubscribeJSON[T any](
 				if err := msg.Ack(false); err != nil {
 					fmt.Printf("couldn't deliver acknowledge: %v", err)
 				}
-				fmt.Println("Ack")
 			case NackRequeue:
 				if err := msg.Nack(false, true); err != nil {
 					fmt.Printf("coudln't deliver acknowledge: %v", err)
 				}
-				fmt.Println("NackRequeue")
 			case NackDiscard:
 				if err := msg.Nack(false, false); err != nil {
 					fmt.Printf("couldn't deliver acknowledge: %v", err)
 				}
-				fmt.Println("NackDiscard")
 			}
 		}
 	}()
