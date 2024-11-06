@@ -162,3 +162,16 @@ func SubscribeGob[T any](
 
 	return nil
 }
+
+// TODO: refactor the code using subscribe helper
+// func subscribe[T any](
+// 	conn *amqp.Connection,
+// 	exchange,
+// 	queuename,
+// 	key string,
+// 	simpleQueueType SimpleQueueType,
+// 	handler func(T) AckType,
+// 	decoder func([]byte) (T, error),
+// ) error {
+// 	return nil
+// }
