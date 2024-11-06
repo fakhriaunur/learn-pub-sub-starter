@@ -37,9 +37,9 @@ func handlerMove(ch *amqp.Channel, gs *gamelogic.GameState) func(gamelogic.ArmyM
 				armyMove,
 			); err != nil {
 				fmt.Printf("couldn't publish: %v", err)
-				return 0
+				return pubsub.NackRequeue
 			}
-			return pubsub.NackRequeue
+			return pubsub.Ack
 		}
 
 		return pubsub.NackDiscard
@@ -61,9 +61,9 @@ func handlerWar(gs *gamelogic.GameState) func(gamelogic.RecognitionOfWar) pubsub
 			gamelogic.WarOutcomeYouWon,
 			gamelogic.WarOutcomeDraw:
 			return pubsub.Ack
-		default:
-			fmt.Println("unknown war outcome")
-			return pubsub.NackDiscard
 		}
+
+		fmt.Println("unknown war outcome")
+		return pubsub.NackDiscard
 	}
 }
