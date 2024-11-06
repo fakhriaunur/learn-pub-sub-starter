@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
@@ -130,7 +131,11 @@ func main() {
 					publishCh,
 					routing.ExchangePerilTopic,
 					routing.GameLogSlug+".*",
-					maliciousLogMsg,
+					routing.GameLog{
+						CurrentTime: time.Now(),
+						Username:    gameState.GetUsername(),
+						Message:     maliciousLogMsg,
+					},
 				); err != nil {
 					fmt.Printf("error: %v\n", err)
 					continue
