@@ -1,6 +1,8 @@
 package pubsub
 
 import (
+	"bytes"
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 
@@ -104,6 +106,57 @@ func SubscribeJSON[T any](
 					fmt.Printf("couldn't deliver acknowledge: %v", err)
 				}
 			}
+		}
+	}()
+
+	return nil
+}
+
+func SubscribeGob[T any](
+	conn *amqp.Connection,
+	exchange,
+	queueName,
+	key string,
+	simpleQueueType SimpleQueueType,
+	handler func(T) AckType,
+) error {
+	ch, queue, err := DeclareAndBind(
+		conn, exchange, queueName,
+		key, simpleQueueType,
+	)
+	if err != nil {
+		return fmt.Errorf("couldn't declare and bind: %w", err)
+	}
+
+	deliveryCh, err := ch.Consume(
+		queue.Name, "", false, false, false,
+		false,
+		amqp.Table{},
+	)
+	if err != nil {
+		return fmt.Errorf("couldn't consume: %w", err)
+	}
+
+	go func() {
+		defer ch.Close()
+		for msg := range deliveryCh {
+			var gobMsg T
+			b := bytes.NewBuffer(msg.Body)
+			decoder := gob.NewDecoder(b)
+			if err := decoder.Decode(&gobMsg); err != nil {
+				fmt.Printf("couldn't decode: %v", err)
+			}
+
+			ackType := handler(gobMsg)
+			switch ackType {
+			case Ack:
+				msg.Ack(false)
+			case NackRequeue:
+				msg.Nack(false, true)
+			case NackDiscard:
+				msg.Nack(false, false)
+			}
+
 		}
 	}()
 
