@@ -75,6 +75,10 @@ func SubscribeJSON[T any](
 		return fmt.Errorf("couldnt declare and bind: %w", err)
 	}
 
+	if err := ch.Qos(10, 0, false); err != nil {
+		return fmt.Errorf("couldn't set the qos: %w", err)
+	}
+
 	deliveryCh, err := ch.Consume(
 		queue.Name, "", false, false, false, false,
 		amqp.Table{},
@@ -126,6 +130,10 @@ func SubscribeGob[T any](
 	)
 	if err != nil {
 		return fmt.Errorf("couldn't declare and bind: %w", err)
+	}
+
+	if err := ch.Qos(10, 0, false); err != nil {
+		return fmt.Errorf("couldn't set qos: %w", err)
 	}
 
 	deliveryCh, err := ch.Consume(
