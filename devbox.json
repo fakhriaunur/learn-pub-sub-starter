@@ -2,6 +2,9 @@
   "$schema":  "https://raw.githubusercontent.com/jetify-com/devbox/0.13.6/.schema/devbox.schema.json",
   "packages": ["rabbitmq-server@latest", "go@1.23.1"],
   "include": ["github:fakhriaunur/devbox-plugins?dir=rabbitmq"],
+  "env": {
+    "ERL_AFLAGS": "+fnu"
+  },
   "shell": {
     "init_hook": [
       "echo 'Welcome to devbox!' > /dev/null",
