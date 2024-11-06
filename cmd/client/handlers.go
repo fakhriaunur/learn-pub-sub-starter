@@ -25,7 +25,6 @@ func handlerMove(ch *amqp.Channel, gs *gamelogic.GameState) func(gamelogic.ArmyM
 		defer fmt.Print("> ")
 
 		moveOutcome := gs.HandleMove(armyMove)
-		fmt.Printf("moveOutcome: %v\n", moveOutcome)
 		if moveOutcome == gamelogic.MoveOutcomeSafe {
 			return pubsub.Ack
 		}
@@ -54,10 +53,7 @@ func handlerWar(ch *amqp.Channel, gs *gamelogic.GameState) func(gamelogic.Recogn
 	return func(recogWar gamelogic.RecognitionOfWar) pubsub.AckType {
 		defer fmt.Print("> ")
 
-		fmt.Printf("RecogWar: %+v\n", recogWar)
 		warOutcome, winner, loser := gs.HandleWar(recogWar)
-		fmt.Printf("Winner: %s, Loser: %s\n", winner, loser)
-		fmt.Printf("Current username: %s\n", gs.GetUsername())
 
 		var ackType pubsub.AckType
 		var message string

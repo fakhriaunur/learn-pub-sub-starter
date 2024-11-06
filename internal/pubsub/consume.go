@@ -67,53 +67,19 @@ func SubscribeJSON[T any](
 	simpleQueueType SimpleQueueType,
 	handler func(T) AckType,
 ) error {
-	ch, queue, err := DeclareAndBind(
-		conn, exchange, queueName,
-		key, simpleQueueType,
+	return subscribe[T](
+		conn,
+		exchange,
+		queueName,
+		key,
+		simpleQueueType,
+		handler,
+		func(data []byte) (T, error) {
+			var target T
+			err := json.Unmarshal(data, &target)
+			return target, err
+		},
 	)
-	if err != nil {
-		return fmt.Errorf("couldnt declare and bind: %w", err)
-	}
-
-	if err := ch.Qos(10, 0, false); err != nil {
-		return fmt.Errorf("couldn't set the qos: %w", err)
-	}
-
-	deliveryCh, err := ch.Consume(
-		queue.Name, "", false, false, false, false,
-		amqp.Table{},
-	)
-	if err != nil {
-		return fmt.Errorf("couldn't consume: %w", err)
-	}
-
-	go func() {
-		defer ch.Close()
-		for msg := range deliveryCh {
-			var jsonMsg T
-			if err := json.Unmarshal(msg.Body, &jsonMsg); err != nil {
-				fmt.Printf("couldn't unmarshal: %v", err)
-			}
-
-			ackType := handler(jsonMsg)
-			switch ackType {
-			case Ack:
-				if err := msg.Ack(false); err != nil {
-					fmt.Printf("couldn't deliver acknowledge: %v", err)
-				}
-			case NackRequeue:
-				if err := msg.Nack(false, true); err != nil {
-					fmt.Printf("coudln't deliver acknowledge: %v", err)
-				}
-			case NackDiscard:
-				if err := msg.Nack(false, false); err != nil {
-					fmt.Printf("couldn't deliver acknowledge: %v", err)
-				}
-			}
-		}
-	}()
-
-	return nil
 }
 
 func SubscribeGob[T any](
@@ -124,9 +90,38 @@ func SubscribeGob[T any](
 	simpleQueueType SimpleQueueType,
 	handler func(T) AckType,
 ) error {
+	return subscribe[T](
+		conn,
+		exchange,
+		queueName,
+		key,
+		simpleQueueType,
+		handler,
+		func(data []byte) (T, error) {
+			buffer := bytes.NewBuffer(data)
+			decoder := gob.NewDecoder(buffer)
+			var target T
+			err := decoder.Decode(&target)
+			return target, err
+		},
+	)
+}
+
+func subscribe[T any](
+	conn *amqp.Connection,
+	exchange,
+	queueName,
+	key string,
+	simpleQueueType SimpleQueueType,
+	handler func(T) AckType,
+	decoder func([]byte) (T, error),
+) error {
 	ch, queue, err := DeclareAndBind(
-		conn, exchange, queueName,
-		key, simpleQueueType,
+		conn,
+		exchange,
+		queueName,
+		key,
+		simpleQueueType,
 	)
 	if err != nil {
 		return fmt.Errorf("couldn't declare and bind: %w", err)
@@ -136,10 +131,13 @@ func SubscribeGob[T any](
 		return fmt.Errorf("couldn't set qos: %w", err)
 	}
 
-	deliveryCh, err := ch.Consume(
-		queue.Name, "", false, false, false,
-		false,
-		amqp.Table{},
+	msgs, err := ch.Consume(
+		queue.Name,
+		"",
+		false, false, false, false,
+		amqp.Table{
+			"x-dead-letter-exchange": "peril_dlx",
+		},
 	)
 	if err != nil {
 		return fmt.Errorf("couldn't consume: %w", err)
@@ -147,39 +145,24 @@ func SubscribeGob[T any](
 
 	go func() {
 		defer ch.Close()
-		for msg := range deliveryCh {
-			var gobMsg T
-			b := bytes.NewBuffer(msg.Body)
-			decoder := gob.NewDecoder(b)
-			if err := decoder.Decode(&gobMsg); err != nil {
-				fmt.Printf("couldn't decode: %v", err)
+		for msg := range msgs {
+			target, err := decoder(msg.Body)
+			if err != nil {
+				fmt.Printf("couldn't decode: %n\n", err)
 			}
 
-			ackType := handler(gobMsg)
+			ackType := handler(target)
+
 			switch ackType {
 			case Ack:
-				msg.Ack(false)
+				msg.Ack(true)
 			case NackRequeue:
 				msg.Nack(false, true)
 			case NackDiscard:
 				msg.Nack(false, false)
 			}
-
 		}
 	}()
 
 	return nil
 }
-
-// TODO: refactor the code using subscribe helper
-// func subscribe[T any](
-// 	conn *amqp.Connection,
-// 	exchange,
-// 	queuename,
-// 	key string,
-// 	simpleQueueType SimpleQueueType,
-// 	handler func(T) AckType,
-// 	decoder func([]byte) (T, error),
-// ) error {
-// 	return nil
-// }

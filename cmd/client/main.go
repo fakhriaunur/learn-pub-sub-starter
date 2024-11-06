@@ -142,8 +142,6 @@ func main() {
 				}
 				fmt.Printf("Publishing message #%d\n", i)
 			}
-
-			// fmt.Println("Spamming not allowed yet!")
 		case "quit":
 			gamelogic.PrintQuit()
 			log.Println("Quitting the game...")
